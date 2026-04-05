@@ -8,7 +8,6 @@ import {
   Link as LinkIcon,
   MoreHorizontal,
   Camera,
-  Settings,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "./ui/button";
@@ -37,102 +36,42 @@ interface Tweet {
   retweeted?: boolean;
   image?: string;
 }
-const tweets: Tweet[] = [
-  {
-    id: "1",
-    author: {
-      id: "1",
-      username: "elonmusk",
-      displayName: "Elon Musk",
-      avatar:
-        "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=400",
-      verified: true,
-    },
-    content:
-      "Just had an amazing conversation about the future of AI. The possibilities are endless!",
-    timestamp: "2h",
-    likes: 1247,
-    retweets: 324,
-    comments: 89,
-    liked: false,
-    retweeted: false,
-  },
-  {
-    id: "2",
-    author: {
-      id: "1",
-      username: "sarahtech",
-      displayName: "Sarah Johnson",
-      avatar:
-        "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=400",
-      verified: false,
-    },
-    content:
-      "Working on some exciting new features for our app. Can't wait to share what we've been building! 🚀",
-    timestamp: "4h",
-    likes: 89,
-    retweets: 23,
-    comments: 12,
-    liked: true,
-    retweeted: false,
-  },
-  {
-    id: "3",
-    author: {
-      id: "4",
-      username: "designguru",
-      displayName: "Alex Chen",
-      avatar:
-        "https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=400",
-      verified: true,
-    },
-    content:
-      "The new design system is finally complete! It took 6 months but the results are incredible. Clean, consistent, and accessible.",
-    timestamp: "6h",
-    likes: 456,
-    retweets: 78,
-    comments: 34,
-    liked: false,
-    retweeted: true,
-    image:
-      "https://images.pexels.com/photos/196645/pexels-photo-196645.jpeg?auto=compress&cs=tinysrgb&w=800",
-  },
-];
+
 export default function ProfilePage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("posts");
   const [showEditModal, setShowEditModal] = useState(false);
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  if (!user) return null;
-  const [tweets, setTweets] = useState<any>([]);
-  const [loading, setloading] = useState(false);
   const fetchTweets = async () => {
     try {
-      setloading(true);
+      setLoading(true);
       const res = await axiosInstance.get("/post");
       setTweets(res.data);
     } catch (error) {
       console.error(error);
     } finally {
-      setloading(false);
+      setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchTweets();
   }, []);
-  // Filter tweets by current user
-  const userTweets = tweets.filter((tweet: any) => tweet.author._id === user._id);
+
+  if (!user) return null;
+
+  const userTweets = tweets.filter(
+    (tweet: any) => tweet.author._id === user._id
+  );
 
   return (
     <div className="min-h-screen">
       {/* Header */}
       <div className="sticky top-0 bg-black/90 backdrop-blur-md border-b border-gray-800 z-10">
         <div className="flex items-center px-4 py-3 space-x-8">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-2 rounded-full hover:bg-gray-900"
-          >
+          <Button variant="ghost" size="sm" className="p-2 rounded-full hover:bg-gray-900">
             <ArrowLeft className="h-5 w-5 text-white" />
           </Button>
           <div>
@@ -189,16 +128,10 @@ export default function ProfilePage() {
       <div className="px-4 pb-4 mt-12">
         <div className="flex items-start justify-between mb-3">
           <div>
-            <h1 className="text-2xl font-bold text-white">
-              {user.displayName}
-            </h1>
+            <h1 className="text-2xl font-bold text-white">{user.displayName}</h1>
             <p className="text-gray-400">@{user.username}</p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-2 rounded-full hover:bg-gray-900"
-          >
+          <Button variant="ghost" size="sm" className="p-2 rounded-full hover:bg-gray-900">
             <MoreHorizontal className="h-5 w-5 text-gray-400" />
           </Button>
         </div>
@@ -210,13 +143,11 @@ export default function ProfilePage() {
         <div className="flex items-center space-x-4 text-gray-400 text-sm mb-3">
           <div className="flex items-center space-x-1">
             <MapPin className="h-4 w-4" />
-            <span>{user.location ? user.location : "Earth"}</span>
+            <span>{user.location ?? "Earth"}</span>
           </div>
           <div className="flex items-center space-x-1">
             <LinkIcon className="h-4 w-4" />
-            <span className="text-blue-400">
-              {user.website ? user.website : "example.com"}
-            </span>
+            <span className="text-blue-400">{user.website ?? "example.com"}</span>
           </div>
           <div className="flex items-center space-x-1">
             <Calendar className="h-4 w-4" />
@@ -235,53 +166,36 @@ export default function ProfilePage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5 bg-transparent border-b border-gray-800 rounded-none h-auto">
-          <TabsTrigger
-            value="posts"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
-          >
-            Posts
-          </TabsTrigger>
-          <TabsTrigger
-            value="replies"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
-          >
-            Replies
-          </TabsTrigger>
-          <TabsTrigger
-            value="highlights"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
-          >
-            Highlights
-          </TabsTrigger>
-          <TabsTrigger
-            value="articles"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
-          >
-            Articles
-          </TabsTrigger>
-          <TabsTrigger
-            value="media"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold"
-          >
-            Media
-          </TabsTrigger>
+          {["posts", "replies", "highlights", "articles", "media"].map((tab) => (
+            <TabsTrigger
+              key={tab}
+              value={tab}
+              className="data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-400 hover:bg-gray-900/50 py-4 font-semibold capitalize"
+            >
+              {tab}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value="posts" className="mt-0">
           <div className="divide-y divide-gray-800">
-            { loading ? (
+            {loading ? (
+              <Card className="bg-black border-none">
+                <CardContent className="py-12 text-center">
+                  <p className="text-gray-400">Loading posts...</p>
+                </CardContent>
+              </Card>
+            ) : userTweets.length === 0 ? (
               <Card className="bg-black border-none">
                 <CardContent className="py-12 text-center">
                   <div className="text-gray-400">
-                    <h3 className="text-2xl font-bold mb-2">
-                      You haven't posted yet
-                    </h3>
+                    <h3 className="text-2xl font-bold mb-2">You haven&apos;t posted yet</h3>
                     <p>When you post, it will show up here.</p>
                   </div>
                 </CardContent>
               </Card>
             ) : (
-              userTweets.map((tweet:any) => (
+              userTweets.map((tweet: any) => (
                 <TweetCard key={tweet._id} tweet={tweet} />
               ))
             )}
@@ -292,9 +206,7 @@ export default function ProfilePage() {
           <Card className="bg-black border-none">
             <CardContent className="py-12 text-center">
               <div className="text-gray-400">
-                <h3 className="text-2xl font-bold mb-2">
-                  You haven't replied yet
-                </h3>
+                <h3 className="text-2xl font-bold mb-2">You haven&apos;t replied yet</h3>
                 <p>When you reply to a post, it will show up here.</p>
               </div>
             </CardContent>
@@ -305,9 +217,7 @@ export default function ProfilePage() {
           <Card className="bg-black border-none">
             <CardContent className="py-12 text-center">
               <div className="text-gray-400">
-                <h3 className="text-2xl font-bold mb-2">
-                  Lights, camera … attachments!
-                </h3>
+                <h3 className="text-2xl font-bold mb-2">Lights, camera &hellip; attachments!</h3>
                 <p>When you post photos or videos, they will show up here.</p>
               </div>
             </CardContent>
@@ -318,9 +228,7 @@ export default function ProfilePage() {
           <Card className="bg-black border-none">
             <CardContent className="py-12 text-center">
               <div className="text-gray-400">
-                <h3 className="text-2xl font-bold mb-2">
-                  You haven't written any articles
-                </h3>
+                <h3 className="text-2xl font-bold mb-2">You haven&apos;t written any articles</h3>
                 <p>When you write articles, they will show up here.</p>
               </div>
             </CardContent>
@@ -331,15 +239,14 @@ export default function ProfilePage() {
           <Card className="bg-black border-none">
             <CardContent className="py-12 text-center">
               <div className="text-gray-400">
-                <h3 className="text-2xl font-bold mb-2">
-                  Lights, camera … attachments!
-                </h3>
+                <h3 className="text-2xl font-bold mb-2">Lights, camera &hellip; attachments!</h3>
                 <p>When you post photos or videos, they will show up here.</p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
       <Editprofile
         isopen={showEditModal}
         onclose={() => setShowEditModal(false)}

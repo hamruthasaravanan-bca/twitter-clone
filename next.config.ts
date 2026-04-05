@@ -8,4 +8,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-"@ | Out-File -FilePath next.config.ts -Encoding utf8"
